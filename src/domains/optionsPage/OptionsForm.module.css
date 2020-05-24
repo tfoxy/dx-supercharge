@@ -1,0 +1,11 @@
+.input {
+  width: 200px;
+}
+
+.success {
+  color: green;
+}
+
+.error {
+  color: red;
+}

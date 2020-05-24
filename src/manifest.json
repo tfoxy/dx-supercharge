@@ -1,0 +1,14 @@
+{
+  "name": "DX Supercharge",
+  "version": "1.0.0",
+  "description": "Utilities to improve the Developer Experience",
+  "manifest_version": 2,
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  },
+  "options_page": "options.html",
+  "optional_permissions": ["http://*/", "https://*/"],
+  "permissions": ["https://github.com/*", "notifications", "webNavigation"],
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
+}

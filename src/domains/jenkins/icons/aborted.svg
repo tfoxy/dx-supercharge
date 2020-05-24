@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <g transform="translate(12 12)">
+    <circle fill="#949393" r="11"></circle>
+    <polygon fill="#fff" points="-5 -1 5 -1 5 1 -5 1"></polygon>
+  </g>
+</svg>
