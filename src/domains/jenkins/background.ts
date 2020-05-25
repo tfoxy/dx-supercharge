@@ -18,7 +18,7 @@ const iconByStatusMap: Record<string, string | undefined> = {
   success: check,
   failure: times,
   running: play,
-  notBuilt: stop,
+  not_built: stop,
   unstable: exclamation,
   aborted: stop,
   paused: pause,

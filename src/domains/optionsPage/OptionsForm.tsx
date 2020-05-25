@@ -69,7 +69,7 @@ export default function OptionsForm() {
       <h2>Jenkins</h2>
       <div>
         <label>
-          <span>Match Pattern Url </span>
+          <span>Domain (without / at the end) </span>
           <input
             type="text"
             name="jenkinsDomain"
