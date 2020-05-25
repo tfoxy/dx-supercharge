@@ -10,16 +10,7 @@ export function addServiceStatusChange(change: ServiceStatusChange) {
     const serviceStatus = serviceStatuses.find((ss) => ss.url === change.url);
     if (serviceStatus && serviceStatus.status !== change.status) {
       updateServiceStatus(serviceStatus, change);
-      createNotification(
-        undefined,
-        {
-          type: "basic",
-          title: change.status,
-          message: change.name,
-          iconUrl: change.iconUrl,
-        },
-        { tabId: change.tabId }
-      );
+      createServiceStatusNotification(serviceStatus, change);
     } else {
       serviceStatuses.push(createServiceStatus(change));
     }
@@ -73,6 +64,29 @@ function updateServiceStatus(
   serviceStatus.name = change.name;
   serviceStatus.iconUrl = change.iconUrl;
   serviceStatus.modifiedDate = change.modifiedDate ?? new Date().toISOString();
-  serviceStatus.tabIds.push(change.tabId);
+  if (!serviceStatus.tabIds.includes(change.tabId)) {
+    serviceStatus.tabIds.push(change.tabId);
+  }
   serviceStatus.changed = true;
+}
+
+function createServiceStatusNotification(
+  serviceStatus: ServiceStatus,
+  change: ServiceStatusChange
+) {
+  createNotification(
+    undefined,
+    {
+      type: "basic",
+      title: change.status,
+      message: change.name,
+      iconUrl: change.iconUrl,
+    },
+    {
+      tabId: change.tabId,
+      onClose: () => {
+        turnOffChangedFlag(serviceStatus.url);
+      },
+    }
+  );
 }

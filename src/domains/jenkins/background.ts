@@ -5,16 +5,16 @@ import {
   play,
   exclamation,
   pause,
+  question,
 } from "../notificationIcons";
 import { JenkinsMessage, JENKINS_MESSAGE_TYPE } from "./types";
 import { Runtime, WebNavigation, browser } from "webextension-polyfill-ts";
 import { capitalize } from "lodash-es";
-import { createNotification } from "../notificationManager/background";
 import { registerServiceListeners } from "../serviceUtils/background";
 import { addServiceStatusChange } from "../serviceStatuses";
 
 const iconByStatusMap: Record<string, string | undefined> = {
-  unknown: stop,
+  unknown: question,
   success: check,
   failure: times,
   running: play,
