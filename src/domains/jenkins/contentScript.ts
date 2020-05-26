@@ -15,14 +15,9 @@ export function executeJenkinsContentScript() {
   if (!window.location.pathname.startsWith("/blue/")) {
     return;
   }
-  const scriptCommunication = executePageScriptFile(
+  executePageScriptFile(
     browser.runtime.getURL("jenkinsPageScript.js")
-  );
-  scriptCommunication.addEventListener(
-    PAGE_SCRIPT_MESSAGE_TYPE,
-    pageScriptMessageListener
-  );
-  scriptCommunication.start();
+  ).addEventListener(pageScriptMessageListener);
 }
 
 function pageScriptMessageListener(event: CustomEvent) {

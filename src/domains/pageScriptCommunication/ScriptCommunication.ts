@@ -4,19 +4,15 @@ type ScriptMessageType =
   | typeof CONTENT_SCRIPT_MESSAGE_TYPE
   | typeof PAGE_SCRIPT_MESSAGE_TYPE;
 
-interface ScriptCommunicationEventMap {
-  error: ErrorEvent;
-  [CONTENT_SCRIPT_MESSAGE_TYPE]: CustomEvent;
-  [PAGE_SCRIPT_MESSAGE_TYPE]: CustomEvent;
-}
-
-type ScriptCommunicationEventListener<
-  K extends keyof ScriptCommunicationEventMap = keyof ScriptCommunicationEventMap
-> = (event: ScriptCommunicationEventMap[K]) => void;
+const messageTypeMap = {
+  [CONTENT_SCRIPT_MESSAGE_TYPE]: PAGE_SCRIPT_MESSAGE_TYPE,
+  [PAGE_SCRIPT_MESSAGE_TYPE]: CONTENT_SCRIPT_MESSAGE_TYPE,
+} as const;
 
 export default class ScriptCommunication {
   private script: HTMLScriptElement;
   private messageType: ScriptMessageType;
+  private listenerType: ScriptMessageType;
 
   public constructor(
     script: HTMLScriptElement,
@@ -24,13 +20,7 @@ export default class ScriptCommunication {
   ) {
     this.script = script;
     this.messageType = messageType;
-  }
-
-  public start() {
-    document.head.appendChild(this.script);
-    if (this.script.parentNode) {
-      this.script.parentNode.removeChild(this.script);
-    }
+    this.listenerType = messageTypeMap[messageType];
   }
 
   public postMessage(detail: any) {
@@ -40,17 +30,11 @@ export default class ScriptCommunication {
     this.script.dispatchEvent(event);
   }
 
-  public addEventListener<K extends keyof ScriptCommunicationEventMap>(
-    type: K,
-    listener: ScriptCommunicationEventListener<K>
-  ) {
-    this.script.addEventListener<any>(type, listener);
+  public addEventListener(listener: (event: CustomEvent) => void) {
+    this.script.addEventListener<any>(this.listenerType, listener);
   }
 
-  public removeEventListener<K extends keyof ScriptCommunicationEventMap>(
-    type: K,
-    listener: ScriptCommunicationEventListener<K>
-  ) {
-    this.script.removeEventListener<any>(type, listener);
+  public removeEventListener(listener: (event: CustomEvent) => void) {
+    this.script.removeEventListener<any>(this.listenerType, listener);
   }
 }
