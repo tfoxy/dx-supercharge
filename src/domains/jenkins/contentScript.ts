@@ -63,10 +63,7 @@ function activityListener({
   activityApiUrl,
 }: ActivityMessage) {
   if (isPipelineRun(activity) && (!oldActivity || isPipelineRun(oldActivity))) {
-    const userMatches: boolean = activity.changeSet.some(
-      (change) => change.author.id === authUserId
-    );
-    if (userMatches && (!oldActivity || activity.state !== oldActivity.state)) {
+    if (!oldActivity || activity.state !== oldActivity.state) {
       sendJenkinsStatusChange({
         url: getUrlFromApiUrl(activityApiUrl),
         title: document.title,
