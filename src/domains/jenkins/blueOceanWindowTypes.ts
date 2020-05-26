@@ -6,18 +6,6 @@ export const BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME =
 export const BLUE_OCEAN_PIPELINE_RUN_IMPL_WITH_SUMMARY_CLASS_NAME =
   "io.jenkins.blueocean.rest.impl.pipeline.PipelineImpl$PipelineRunSummary";
 
-export const ACTIVITY_MESSAGE_TYPE = "activity";
-
-export interface ActivityMessage<
-  T extends BlueOceanActivity = BlueOceanActivity
-> {
-  type: typeof ACTIVITY_MESSAGE_TYPE;
-  activityApiUrl: string;
-  activity: T;
-  oldActivity?: T;
-  authUserId: string;
-}
-
 export type BlueOceanPipelineRunImplClassName =
   | typeof BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME
   | typeof BLUE_OCEAN_PIPELINE_RUN_IMPL_WITH_SUMMARY_CLASS_NAME;
@@ -120,6 +108,9 @@ export interface BlueOceanPipelineService {
   ) => BlueOceanPipelineFolderImpl | BlueOceanMultiBranchPipelineImpl;
 }
 
+/**
+ * @see https://javadoc.jenkins.io/plugin/blueocean-pipeline-api-impl/io/jenkins/blueocean/rest/impl/pipeline/PipelineRunImpl.html
+ */
 export interface BlueOceanPipelineRunImpl {
   _class: BlueOceanPipelineRunImplClassName;
   actions: unknown[];
@@ -144,6 +135,7 @@ export interface BlueOceanPipelineRunImpl {
   pullRequest: string | null;
   replayable: boolean;
   /**
+   * @see https://javadoc.jenkins.io/plugin/blueocean-rest/io/jenkins/blueocean/rest/model/BlueRun.BlueRunResult.html
    * @see https://javadoc.jenkins-ci.org/hudson/model/Result.html
    */
   result:
@@ -151,11 +143,14 @@ export interface BlueOceanPipelineRunImpl {
     | "FAILURE"
     | "NOT_BUILT"
     | "SUCCESS"
-    | "UNSTABLE"
-    | "UNKNOWN";
+    | "UNKNOWN"
+    | "UNSTABLE";
   runSummary: string;
   startTime: string;
-  state: "QUEUED" | "RUNNING" | "PAUSED" | "FINISHED";
+  /**
+   * @see https://javadoc.jenkins.io/plugin/blueocean-rest/io/jenkins/blueocean/rest/model/BlueRun.BlueRunState.html
+   */
+  state: "FINISHED" | "NOT_BUILT" | "PAUSED" | "QUEUED" | "RUNNING" | "SKIPPED";
   type: string;
 }
 

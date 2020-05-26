@@ -2,15 +2,13 @@ import ScriptCommunication from "../pageScriptCommunication/ScriptCommunication"
 import { PAGE_SCRIPT_MESSAGE_TYPE } from "../pageScriptCommunication/types";
 import {
   BlueOceanWindow,
-  ActivityMessage,
-  ACTIVITY_MESSAGE_TYPE,
   JenkinsCIGlobalPlugin,
   JenkinsCIGlobalPlugins,
-  JenkinsCIGlobalPluginLoadingModule,
   JenkinsCIGlobalPluginModule,
   JenkinsCIGlobalLoadingModules,
   JenkinsCIGlobalPluginTypeMap,
 } from "./blueOceanWindowTypes";
+import { ActivityMessage, ACTIVITY_MESSAGE_TYPE } from "./types";
 
 declare const window: Window & BlueOceanWindow;
 

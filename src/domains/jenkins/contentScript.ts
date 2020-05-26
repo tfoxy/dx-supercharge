@@ -1,12 +1,12 @@
 import { sendJenkinsStatusChange } from "./client";
 import {
   BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME,
-  ActivityMessage,
   BlueOceanPipelineRunImpl,
   BlueOceanActivity,
 } from "./blueOceanWindowTypes";
 import { executePageScriptFile } from "../pageScriptCommunication";
 import { browser } from "webextension-polyfill-ts";
+import { ActivityMessage } from "./types";
 
 const API_URL_REGEX = /^\/blue\/rest\/organizations\/([^/]+?)((?:\/pipelines\/[^/]+?)+?)\/branches\/([^/]+?)\/runs\/([^/]+?)\//;
 
