@@ -23,16 +23,29 @@ function pageScriptMessageListener(event: CustomEvent) {
   activityListener(event.detail);
 }
 
-function getUrlFromApiUrl(apiUrl: string) {
+function getPartsFromApiUrl(apiUrl: string) {
   const matchResults = apiUrl.match(API_URL_REGEX);
   if (!matchResults) {
     throw new Error(`Unknown API url: ${apiUrl}`);
   }
   const [, organization, pipelinesUrl, branch, run] = matchResults;
-  const pipelines = pipelinesUrl
-    .replace(/^\/pipelines\//, "")
-    .replace(/\/pipelines\//g, "%2F");
-  return `/blue/organizations/${organization}/${pipelines}/detail/${branch}/${run}`;
+  return {
+    organization,
+    pipelines: pipelinesUrl.split("/pipelines/").slice(1),
+    branch,
+    run,
+  };
+}
+
+function getUrlFromApiUrl(apiUrl: string) {
+  const { organization, pipelines, branch, run } = getPartsFromApiUrl(apiUrl);
+  const pipelinesUri = pipelines.join("%2F");
+  return `/blue/organizations/${organization}/${pipelinesUri}/detail/${branch}/${run}`;
+}
+
+function getTitleFromApiUrl(apiUrl: string) {
+  const { organization, pipelines, branch, run } = getPartsFromApiUrl(apiUrl);
+  return [organization, pipelines.join("/"), branch, `#${run}`].join(" / ");
 }
 
 function getPipelineRunStatus({
@@ -66,7 +79,7 @@ function activityListener({
     if (!oldActivity || activity.state !== oldActivity.state) {
       sendJenkinsStatusChange({
         url: getUrlFromApiUrl(activityApiUrl),
-        title: document.title,
+        title: getTitleFromApiUrl(activityApiUrl),
         status: getPipelineRunStatus(activity),
       });
     }
