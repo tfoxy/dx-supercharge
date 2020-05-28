@@ -8,7 +8,14 @@ import {
   JenkinsCIGlobalLoadingModules,
   JenkinsCIGlobalPluginTypeMap,
 } from "./blueOceanWindowTypes";
-import { ActivityMessage, ACTIVITY_MESSAGE_TYPE } from "./types";
+import {
+  ActivityMessage,
+  ACTIVITY_MESSAGE_TYPE,
+  HistoryMessage,
+  HISTORY_MESSAGE_TYPE,
+} from "./types";
+import { addHistoryChangeListener } from "../historyChangeListener";
+import { getApiUrlFromBrowserUrl } from "./blueOceanUrlUtils";
 
 declare const window: Window & BlueOceanWindow;
 
@@ -26,10 +33,10 @@ export async function executeJenkinsPageScript() {
   const authUserId = getAuthUser().id;
 
   const activityServiceData = blueOceanCoreJs.activityService._data;
-  activityServiceData.forEach((activity, activityApiUrl) => {
+  activityServiceData.forEach((activity, apiUrl) => {
     const message: ActivityMessage = {
       type: ACTIVITY_MESSAGE_TYPE,
-      activityApiUrl,
+      apiUrl,
       activity,
       authUserId,
     };
@@ -39,13 +46,25 @@ export async function executeJenkinsPageScript() {
     if (change.type === "add" || change.type === "update") {
       const message: ActivityMessage = {
         type: ACTIVITY_MESSAGE_TYPE,
-        activityApiUrl: change.name,
+        apiUrl: change.name,
         activity: change.newValue,
         oldActivity: change.oldValue,
         authUserId,
       };
       communication.postMessage(mobx.toJS(message));
     }
+  });
+
+  addHistoryChangeListener(() => {
+    const apiUrl = getApiUrlFromBrowserUrl(window.location.pathname);
+    const activity = activityServiceData.get(apiUrl);
+    const message: HistoryMessage = {
+      type: HISTORY_MESSAGE_TYPE,
+      apiUrl: apiUrl,
+      activity,
+      authUserId,
+    };
+    communication.postMessage(message);
   });
 }
 

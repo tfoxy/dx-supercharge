@@ -10,6 +10,9 @@
   "options_page": "options.html",
   "optional_permissions": ["http://*/", "https://*/"],
   "permissions": ["https://github.com/*", "notifications", "webNavigation"],
-  "web_accessible_resources": ["jenkinsPageScript.js"],
+  "web_accessible_resources": [
+    "jenkinsPageScript.js",
+    "domains/jenkins/icons/*.svg"
+  ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"
 }

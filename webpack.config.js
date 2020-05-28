@@ -4,10 +4,12 @@ const CleanPlugin = require("clean-webpack-plugin").CleanWebpackPlugin;
 const CopyPlugin = require("copy-webpack-plugin");
 const getLocalIdent = require("./webpack/getCSSModuleLocalIdent");
 
+const srcPath = path.join(__dirname, "src");
+
 module.exports = getConfig();
 
 function getConfig() {
-  const manifest = path.join(__dirname, "src", "manifest.json");
+  const manifest = path.join(srcPath, "manifest.json");
   const { entry, htmlFiles } = getEntryAndHtmlPlugins();
 
   /**
@@ -66,7 +68,7 @@ function getConfig() {
           loader: {
             loader: "file-loader",
             options: {
-              name: "[name].[ext]",
+              name: (absolutePath) => path.relative(srcPath, absolutePath),
             },
           },
         },
@@ -92,7 +94,6 @@ function getConfig() {
 }
 
 function getEntryAndHtmlPlugins() {
-  const srcPath = path.join(__dirname, "src");
   const entryFiles = fs.readdirSync(srcPath);
 
   const entry = Object.fromEntries(

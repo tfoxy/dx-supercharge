@@ -1,28 +1,9 @@
-import {
-  stop,
-  check,
-  times,
-  play,
-  exclamation,
-  pause,
-  question,
-} from "../notificationIcons";
 import { JenkinsMessage, JENKINS_MESSAGE_TYPE } from "./types";
 import { Runtime, WebNavigation, browser } from "webextension-polyfill-ts";
 import { capitalize } from "lodash-es";
 import { registerServiceListeners } from "../serviceUtils/background";
 import { addServiceStatusChange } from "../serviceStatuses";
-
-const iconByStatusMap: Record<string, string | undefined> = {
-  unknown: question,
-  success: check,
-  failure: times,
-  running: play,
-  not_built: stop,
-  unstable: exclamation,
-  aborted: stop,
-  paused: pause,
-};
+import * as iconByStatusMap from "./icons";
 
 export function registerJenkinsListeners() {
   registerServiceListeners({
@@ -37,13 +18,15 @@ function messageListener(
   message: JenkinsMessage,
   sender: Runtime.MessageSender
 ) {
-  const iconUrl = iconByStatusMap[message.status] ?? "info";
+  const iconUrl =
+    (iconByStatusMap as Record<string, string>)[message.status] ??
+    iconByStatusMap.unknown;
   addServiceStatusChange({
     iconUrl,
     url: message.url,
     status: capitalize(message.status),
     tabId: sender.tab!.id!,
-    name: message.title,
+    name: message.name,
   });
 }
 
