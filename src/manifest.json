@@ -1,6 +1,6 @@
 {
-  "name": "DX Supercharge",
-  "version": "1.0.0",
+  "name": "My DX Supercharge",
+  "version": "1.1.0",
   "description": "Utilities to improve the Developer Experience",
   "manifest_version": 2,
   "background": {
