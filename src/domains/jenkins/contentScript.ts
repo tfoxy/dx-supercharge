@@ -1,8 +1,9 @@
 import { sendJenkinsStatusChange } from "./client";
 import {
   BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME,
-  BlueOceanPipelineRunImpl,
+  BlueOceanPipelineImpl,
   BlueOceanActivity,
+  BLUE_OCEAN_PIPELINE_IMPL_WITH_SUMMARY_CLASS_NAME,
 } from "./blueOceanWindowTypes";
 import { executePageScriptFile } from "../pageScriptCommunication";
 import { browser } from "webextension-polyfill-ts";
@@ -47,7 +48,7 @@ function pageScriptMessageListener(event: CustomEvent<PageScriptMessage>) {
 function getPipelineRunStatus({
   result,
   state,
-}: BlueOceanPipelineRunImpl): string {
+}: BlueOceanPipelineImpl): string {
   if (state === "FINISHED") {
     return result.toLowerCase();
   }
@@ -56,12 +57,11 @@ function getPipelineRunStatus({
 
 function isPipelineRun(
   activity: BlueOceanActivity
-): activity is BlueOceanPipelineRunImpl {
+): activity is BlueOceanPipelineImpl {
   const className = activity._class;
   return (
-    className.startsWith(BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME) &&
-    (className.length === BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME.length ||
-      className[BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME.length] === "$")
+    className === BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME ||
+    className === BLUE_OCEAN_PIPELINE_IMPL_WITH_SUMMARY_CLASS_NAME
   );
 }
 
@@ -77,14 +77,11 @@ function historyListener(message: HistoryMessage) {
 function activityListener(message: ActivityMessage) {
   const { activity, oldActivity } = message;
   if (isPipelineRun(activity) && (!oldActivity || isPipelineRun(oldActivity))) {
-    pipelineRunListener(message as ActivityMessage<BlueOceanPipelineRunImpl>);
+    pipelineRunListener(message as ActivityMessage<BlueOceanPipelineImpl>);
   }
 }
 
-function checkDocumentIcon(
-  pipelineRun: BlueOceanPipelineRunImpl,
-  apiUrl: string
-) {
+function checkDocumentIcon(pipelineRun: BlueOceanPipelineImpl, apiUrl: string) {
   if (isBrowserUrlEqualToApiUrl(window.location.pathname, apiUrl)) {
     if (!iconLink) {
       iconLink = document.createElement("link");
@@ -115,7 +112,7 @@ function pipelineRunListener({
   activity: pipelineRun,
   oldActivity: oldPipelineRun,
   apiUrl,
-}: ActivityMessage<BlueOceanPipelineRunImpl>) {
+}: ActivityMessage<BlueOceanPipelineImpl>) {
   const browserUrl = window.location.pathname;
   if (isBrowserUrlIncludedInApiUrl(browserUrl, apiUrl)) {
     checkDocumentIcon(pipelineRun, apiUrl);

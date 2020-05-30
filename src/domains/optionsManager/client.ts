@@ -31,7 +31,6 @@ async function applyOptions(options: ExtensionOptions) {
   if (githubDomain !== "") {
     origins.push(`${githubDomain}/*`);
   }
-  console.log(origins);
   await updateOrigins(origins);
 }
 
