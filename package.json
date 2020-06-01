@@ -2,7 +2,8 @@
   "private": true,
   "scripts": {
     "start": "node ./webpack/webserver.js",
-    "build": "node ./webpack/build.js"
+    "build": "node ./webpack/build.js",
+    "test": "jest"
   },
   "dependencies": {
     "lodash-es": "^4.17.15",
@@ -19,9 +20,13 @@
     "copy-webpack-plugin": "^6.0.1",
     "css-loader": "^3.5.3",
     "file-loader": "^6.0.0",
+    "jest": "^26.0.1",
+    "jest-circus": "^26.0.1",
+    "jest-webextension-mock": "^3.6.0",
     "loader-utils": "^2.0.0",
     "mobx": "2.6.0",
     "style-loader": "^1.2.1",
+    "ts-jest": "^26.1.0",
     "ts-loader": "^7.0.4",
     "typescript": "^3.9.3",
     "webpack": "^4.43.0",
