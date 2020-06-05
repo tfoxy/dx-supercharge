@@ -7,15 +7,21 @@ import {
   JenkinsCIGlobalPluginModule,
   JenkinsCIGlobalLoadingModules,
   JenkinsCIGlobalPluginTypeMap,
-} from "./blueOceanWindowTypes";
+  BlueOceanPipelineRunImpl,
+  BlueOceanActivity,
+} from "./blueOceanTypes";
 import {
-  ActivityMessage,
-  ACTIVITY_MESSAGE_TYPE,
-  HistoryMessage,
-  HISTORY_MESSAGE_TYPE,
+  JENKINS_MESSAGE_TYPE,
+  JenkinsMessage,
+  FAVICON_MESSAGE_TYPE,
 } from "./types";
+import { isPipelineRun, getPipelineRunStatus } from "./jenkinsPipelineRun";
+import {
+  getParamsFromBrowserUrl,
+  buildPipelineRunApiUrl,
+} from "./blueOceanUrlUtils";
+import type MobX from "mobx";
 import { addHistoryChangeListener } from "../historyChangeListener";
-import { getApiUrlFromBrowserUrl } from "./blueOceanUrlUtils";
 
 declare const window: Window & BlueOceanWindow;
 
@@ -30,41 +36,13 @@ export async function executeJenkinsPageScript() {
   const blueOceanCoreJs = await waitForModuleToLoad(
     "jenkins-cd-blueocean-core-js"
   );
-  const authUserId = getAuthUser().id;
 
   const activityServiceData = blueOceanCoreJs.activityService._data;
-  activityServiceData.forEach((activity, apiUrl) => {
-    const message: ActivityMessage = {
-      type: ACTIVITY_MESSAGE_TYPE,
-      apiUrl,
-      activity,
-      authUserId,
-    };
-    communication.postMessage(mobx.toJS(message));
-  });
-  mobx.observe(activityServiceData, (change) => {
-    if (change.type === "add" || change.type === "update") {
-      const message: ActivityMessage = {
-        type: ACTIVITY_MESSAGE_TYPE,
-        apiUrl: change.name,
-        activity: change.newValue,
-        oldActivity: change.oldValue,
-        authUserId,
-      };
-      communication.postMessage(mobx.toJS(message));
-    }
-  });
 
+  sendInitialActivityData(communication, mobx, activityServiceData);
+  observeActivityChange(communication, mobx, activityServiceData);
   addHistoryChangeListener(() => {
-    const apiUrl = getApiUrlFromBrowserUrl(window.location.pathname);
-    const activity = activityServiceData.get(apiUrl);
-    const message: HistoryMessage = {
-      type: HISTORY_MESSAGE_TYPE,
-      apiUrl: apiUrl,
-      activity,
-      authUserId,
-    };
-    communication.postMessage(message);
+    sendCurrentPageFavicon(communication, activityServiceData);
   });
 }
 
@@ -92,4 +70,105 @@ function waitForModuleToLoad<K extends keyof JenkinsCIGlobalPlugins>(
 
 function getAuthUser() {
   return window.$blueocean.user;
+}
+
+function isNewPipelineRun(pipelineRun: BlueOceanPipelineRunImpl) {
+  const activityElement = document.querySelector("#outer > main > .activity");
+  if (activityElement) {
+    const activityTableElement = activityElement.querySelector(
+      ":scope > .activity-table"
+    );
+    if (activityTableElement) {
+      const branchAttr = pipelineRun.branch
+        ? `[data-branch="${decodeURIComponent(pipelineRun.pipeline)}"]`
+        : ":not([data-branch])";
+      const runIdAttr = `[data-runid="${pipelineRun.id}"]`;
+      const hasRun = Boolean(
+        activityTableElement.querySelector(`:scope > ${branchAttr}${runIdAttr}`)
+      );
+      const hasAnyRun = Boolean(
+        activityTableElement.querySelector(":scope > [data-runid]")
+      );
+      return hasAnyRun && !hasRun;
+    }
+  }
+  return false;
+}
+
+function isAuthUserPipelineRun(pipelineRun: BlueOceanPipelineRunImpl) {
+  const authUserId = getAuthUser().id;
+  return pipelineRun.changeSet.some((cs) => cs.author.id === authUserId);
+}
+
+function sendInitialActivityData(
+  communication: ScriptCommunication,
+  mobx: typeof MobX,
+  activityServiceData: MobX.ObservableMap<BlueOceanActivity>
+) {
+  activityServiceData.forEach((activity) => {
+    if (isPipelineRun(activity)) {
+      const message: JenkinsMessage = {
+        type: JENKINS_MESSAGE_TYPE,
+        pipelineRun: activity,
+        options: {
+          notify: isNewPipelineRun(activity),
+          store: isAuthUserPipelineRun(activity),
+        },
+      };
+      communication.postMessage(mobx.toJS(message));
+      sendCurrentPageFavicon(communication, activityServiceData);
+    }
+  });
+}
+
+function observeActivityChange(
+  communication: ScriptCommunication,
+  mobx: typeof MobX,
+  activityServiceData: MobX.ObservableMap<BlueOceanActivity>
+) {
+  mobx.observe(activityServiceData, (change) => {
+    const pipelineRun = change.newValue;
+    const oldPipelineRun = change.oldValue;
+    if (
+      pipelineRun &&
+      isPipelineRun(pipelineRun) &&
+      (!oldPipelineRun || isPipelineRun(oldPipelineRun))
+    ) {
+      const notify = oldPipelineRun
+        ? getPipelineRunStatus(pipelineRun) !==
+          getPipelineRunStatus(oldPipelineRun)
+        : isNewPipelineRun(pipelineRun);
+      const message: JenkinsMessage = {
+        type: JENKINS_MESSAGE_TYPE,
+        pipelineRun,
+        options: {
+          notify,
+          store: isAuthUserPipelineRun(pipelineRun),
+        },
+      };
+      communication.postMessage(mobx.toJS(message));
+      sendCurrentPageFavicon(communication, activityServiceData);
+    }
+  });
+}
+
+function sendCurrentPageFavicon(
+  communication: ScriptCommunication,
+  activityServiceData: MobX.ObservableMap<BlueOceanActivity>
+) {
+  let status = "";
+  const activity = getActivityFromLocationPathname(activityServiceData);
+  if (activity && isPipelineRun(activity)) {
+    status = getPipelineRunStatus(activity);
+  }
+  communication.postMessage({ type: FAVICON_MESSAGE_TYPE, status });
+}
+
+function getActivityFromLocationPathname(
+  activityServiceData: MobX.ObservableMap<BlueOceanActivity>
+) {
+  const { pathname } = window.location;
+  const urlParams = getParamsFromBrowserUrl(pathname);
+  const pipelineRunApiUrl = buildPipelineRunApiUrl(urlParams);
+  return activityServiceData.get(pipelineRunApiUrl);
 }

@@ -24,14 +24,14 @@ export async function createNotification(
     notificationId,
     options
   );
-  const { tabId, onClose } = managerOptions;
-  if (tabId || onClose) {
+  const { onClick, onClose } = managerOptions;
+  if (onClick || onClose) {
     const timeoutId = setTimeout(() => {
       clearNotification(actualNotificationId);
     }, NOTIFICATION_TIMEOUT);
     notificationIdMap.set(actualNotificationId, {
       notificationId: actualNotificationId,
-      tabId,
+      onClick,
       onClose,
       timeoutId,
     });
@@ -51,8 +51,8 @@ export function clearNotification(notificationId: string) {
 function clickedListener(notificationId: string) {
   const data = notificationIdMap.get(notificationId);
   if (data) {
-    if (data.tabId) {
-      browser.tabs.update(data.tabId, { active: true });
+    if (data.onClick) {
+      data.onClick();
     }
     clearNotification(notificationId);
   }

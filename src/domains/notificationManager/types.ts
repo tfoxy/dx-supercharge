@@ -1,4 +1,4 @@
 export interface NotificationManagerOptions {
-  tabId?: number;
+  onClick?: () => void;
   onClose?: () => void;
 }

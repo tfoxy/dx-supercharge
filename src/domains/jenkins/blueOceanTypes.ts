@@ -1,14 +1,7 @@
-import type mobx from "mobx";
+import type MobX from "mobx";
 
 export const BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME =
   "io.jenkins.blueocean.rest.impl.pipeline.PipelineRunImpl";
-
-export const BLUE_OCEAN_PIPELINE_IMPL_WITH_SUMMARY_CLASS_NAME =
-  "io.jenkins.blueocean.rest.impl.pipeline.PipelineImpl$PipelineRunSummary";
-
-export type BlueOceanPipelineRunImplClassName =
-  | typeof BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME
-  | typeof BLUE_OCEAN_PIPELINE_IMPL_WITH_SUMMARY_CLASS_NAME;
 
 export interface BlueOceanWindow {
   $blueocean: BlueOceanData;
@@ -43,7 +36,7 @@ export interface JenkinsCIGlobalPluginTypeMap {
     anyName: "jenkins-cd-blueocean-core-js@any";
   };
   mobx: {
-    module: typeof mobx;
+    module: typeof MobX;
     anyName: "mobx@any";
   };
 }
@@ -82,14 +75,14 @@ export interface BlueOceanCoreJsModuleExports {
   pipelineService: BlueOceanPipelineService;
 }
 
-export type BlueOceanActivity = BlueOceanPipelineImpl | BlueOceanTestSummary;
+export type BlueOceanActivity = BlueOceanPipelineRunImpl | BlueOceanTestSummary;
 
 export interface BlueOceanActivityService {
-  _data: mobx.ObservableMap<BlueOceanActivity>;
+  _data: MobX.ObservableMap<BlueOceanActivity>;
   /**
    * @param href "/blue/rest/organizations/:organization/pipelines/:pipeline/branches/:branch/runs/:run/"
    */
-  getActivity: (href: string) => BlueOceanPipelineImpl;
+  getActivity: (href: string) => BlueOceanActivity;
   /**
    * @param href "/blue/rest/organizations/:organization/pipelines/:pipeline/branches/:branch/runs/:run//blueTestSummary/"
    */
@@ -97,7 +90,7 @@ export interface BlueOceanActivityService {
 }
 
 export interface BlueOceanPipelineService {
-  _data: mobx.ObservableMap<
+  _data: MobX.ObservableMap<
     BlueOceanPipelineFolderImpl | BlueOceanMultiBranchPipelineImpl
   >;
   /**
@@ -108,16 +101,21 @@ export interface BlueOceanPipelineService {
   ) => BlueOceanPipelineFolderImpl | BlueOceanMultiBranchPipelineImpl;
 }
 
-export interface BlueOceanPipelineImpl {
-  _class: BlueOceanPipelineRunImplClassName;
+/**
+ * @see https://javadoc.jenkins.io/plugin/blueocean-pipeline-api-impl/io/jenkins/blueocean/rest/impl/pipeline/PipelineRunImpl.html
+ */
+export interface BlueOceanPipelineRunImpl {
+  _class: typeof BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME;
   actions: unknown[];
   branch: {
     isPrimary: boolean;
     issues: unknown[];
     url: string;
-  };
+  } | null;
   causes: BlueOceanCause[];
   changeSet: BlueOceanChange[];
+  commitId: string | null;
+  commitUrl: string | null;
   description: string | null;
   durationInMillis: number;
   enQueueTime: string;
@@ -127,6 +125,7 @@ export interface BlueOceanPipelineImpl {
   name: string | null;
   organization: string;
   pipeline: string;
+  pullRequest: string | null;
   replayable: boolean;
   /**
    * @see https://javadoc.jenkins.io/plugin/blueocean-rest/io/jenkins/blueocean/rest/model/BlueRun.BlueRunResult.html
@@ -146,16 +145,11 @@ export interface BlueOceanPipelineImpl {
    */
   state: "FINISHED" | "NOT_BUILT" | "PAUSED" | "QUEUED" | "RUNNING" | "SKIPPED";
   type: string;
-}
-
-/**
- * @see https://javadoc.jenkins.io/plugin/blueocean-pipeline-api-impl/io/jenkins/blueocean/rest/impl/pipeline/PipelineRunImpl.html
- */
-export interface BlueOceanPipelineRunImpl extends BlueOceanPipelineImpl {
-  _class: typeof BLUE_OCEAN_PIPELINE_RUN_IMPL_CLASS_NAME;
-  commitId: string;
-  commitUrl: string | null;
-  pullRequest: string | null;
+  _links: {
+    self: {
+      href: string;
+    };
+  };
 }
 
 export interface BlueOceanCause {

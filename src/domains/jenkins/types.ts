@@ -1,40 +1,24 @@
-import { BlueOceanActivity } from "./blueOceanWindowTypes";
+import { BlueOceanPipelineRunImpl } from "./blueOceanTypes";
 
-// runtime message type:
 export const JENKINS_MESSAGE_TYPE = "JENKINS";
-// content script message type:
-export const ACTIVITY_MESSAGE_TYPE = "activity";
-export const HISTORY_MESSAGE_TYPE = "history";
+export const FAVICON_MESSAGE_TYPE = "FAVICON";
 
-export interface JenkinsStatusChange {
-  url: string;
-  status: string;
-  name: string;
+export interface JenkinsData {
+  pipelineRuns: BlueOceanPipelineRunImpl[];
 }
 
-export interface JenkinsMessage extends JenkinsStatusChange {
+export interface JenkinsMessage {
   type: typeof JENKINS_MESSAGE_TYPE;
+  pipelineRun: BlueOceanPipelineRunImpl;
+  options: AddPipelineRunOptions;
 }
 
-export type PageScriptMessage<
-  T extends BlueOceanActivity = BlueOceanActivity
-> = ActivityMessage<T> | HistoryMessage<T>;
-
-export interface ActivityMessage<
-  T extends BlueOceanActivity = BlueOceanActivity
-> {
-  type: typeof ACTIVITY_MESSAGE_TYPE;
-  apiUrl: string;
-  activity: T;
-  oldActivity?: T;
-  authUserId: string;
+export interface FaviconMessage {
+  type: typeof FAVICON_MESSAGE_TYPE;
+  status: string;
 }
 
-export interface HistoryMessage<
-  T extends BlueOceanActivity = BlueOceanActivity
-> {
-  type: typeof HISTORY_MESSAGE_TYPE;
-  apiUrl: string;
-  activity: T | undefined;
-  authUserId: string;
+export interface AddPipelineRunOptions {
+  store: boolean;
+  notify: boolean;
 }
