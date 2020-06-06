@@ -1,6 +1,6 @@
 export interface ExtensionOptions {
-  jenkinsDomain: string;
-  githubDomain: string;
+  jenkinsOrigin: string;
+  githubOrigin: string;
 }
 
 export interface OptionsMessage {

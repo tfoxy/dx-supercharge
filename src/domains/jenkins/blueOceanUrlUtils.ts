@@ -1,4 +1,4 @@
-const BROWSER_URL_REGEX = /^\/blue\/organizations\/([^/]+)(?:\/([^/]+)(?:\/detail\/([^/]+)(?:\/([^/]+))?)?)?/;
+const DISPLAY_URL_REGEX = /^\/blue\/organizations\/([^/]+)(?:\/([^/]+)(?:\/detail\/([^/]+)(?:\/([^/]+))?)?)?/;
 const API_URL_REGEX = /^\/blue\/rest\/organizations\/([^/]+?)((?:\/pipelines\/[^/]+?)+?)\/(?:branches\/([^/]+?)\/)?runs\/([^/]+?)\//;
 
 export interface PipelineRunUrlParams {
@@ -8,8 +8,8 @@ export interface PipelineRunUrlParams {
   run: string;
 }
 
-export function getParamsFromBrowserUrl(url: string): PipelineRunUrlParams {
-  const matchResults = url.match(BROWSER_URL_REGEX) ?? [];
+export function getParamsFromDisplayUrl(url: string): PipelineRunUrlParams {
+  const matchResults = url.match(DISPLAY_URL_REGEX) ?? [];
   const [
     ,
     organization = "",
@@ -74,7 +74,7 @@ export function buildPipelineRunApiUrl({
   return parts.join("/");
 }
 
-export function buildPipelineRunBrowserUrl({
+export function buildPipelineRunDisplayUrl({
   organization,
   pipelines,
   branch,

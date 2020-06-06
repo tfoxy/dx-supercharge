@@ -1,9 +1,9 @@
 import {
-  getParamsFromBrowserUrl,
+  getParamsFromDisplayUrl,
   getParamsFromApiUrl,
   PipelineRunUrlParams,
   buildPipelineRunApiUrl,
-  buildPipelineRunBrowserUrl,
+  buildPipelineRunDisplayUrl,
 } from "./blueOceanUrlUtils";
 
 const BRANCH = "testBranch";
@@ -13,9 +13,9 @@ const PIPELINE = "testPipe";
 const REGULAR_API_URL = `/blue/rest/organizations/${ORG}/pipelines/${PIPELINE}/branches/${BRANCH}/runs/${RUN}/`;
 const REGULAR_DISPLAY_URL = `/blue/organizations/${ORG}/${PIPELINE}/detail/${BRANCH}/${RUN}`;
 
-describe("getParamsFromBrowserUrl", () => {
+describe("getParamsFromDisplayUrl", () => {
   it("should match with regular url", () => {
-    const params = getParamsFromBrowserUrl(REGULAR_DISPLAY_URL);
+    const params = getParamsFromDisplayUrl(REGULAR_DISPLAY_URL);
     const expected: PipelineRunUrlParams = {
       branch: BRANCH,
       organization: ORG,
@@ -51,9 +51,9 @@ describe("buildPipelineRunApiUrl", () => {
   });
 });
 
-describe("buildPipelineRunBrowserUrl", () => {
+describe("buildPipelineRunDisplayUrl", () => {
   it("should match to regular url", () => {
-    const url = buildPipelineRunBrowserUrl({
+    const url = buildPipelineRunDisplayUrl({
       branch: BRANCH,
       organization: ORG,
       pipelines: [PIPELINE],

@@ -1,9 +1,9 @@
 import { executePageScriptFile } from "../pageScriptCommunication";
-import { browser } from "webextension-polyfill-ts";
+import { browser, Runtime } from "webextension-polyfill-ts";
 import {
-  JenkinsMessage,
-  FaviconMessage,
-  JENKINS_MESSAGE_TYPE,
+  HISTORY_MESSAGE_TYPE,
+  JENKINS_PORT_NAME,
+  PageScriptMessage,
   FAVICON_MESSAGE_TYPE,
 } from "./types";
 import { getIconUrlFromPipelineRunStatus } from "./jenkinsPipelineRun";
@@ -11,25 +11,27 @@ import { getIconUrlFromPipelineRunStatus } from "./jenkinsPipelineRun";
 let iconLink: HTMLLinkElement | undefined;
 
 export function executeJenkinsContentScript() {
+  const port = browser.runtime.connect(undefined, { name: JENKINS_PORT_NAME });
   executePageScriptFile(
     browser.runtime.getURL("jenkinsPageScript.js")
-  ).addEventListener(pageScriptMessageListener);
+  ).addEventListener((event) => pageScriptMessageListener(event.detail, port));
 }
 
-function pageScriptMessageListener({
-  detail,
-}: CustomEvent<JenkinsMessage | FaviconMessage>) {
-  if (detail.type === JENKINS_MESSAGE_TYPE) {
-    browser.runtime.sendMessage(detail);
-  } else if (detail.type === FAVICON_MESSAGE_TYPE) {
-    setOrRemoveDocumentIconUrl(detail.status);
+function pageScriptMessageListener(
+  message: PageScriptMessage,
+  port: Runtime.Port
+) {
+  if (message.type === FAVICON_MESSAGE_TYPE) {
+    setOrRemoveDocumentIconUrl(message.status);
+    if (message.historyChanged) {
+      port.postMessage({
+        type: HISTORY_MESSAGE_TYPE,
+        url: window.location.href,
+      });
+    }
   } else {
-    throwInvalidType(detail!.type);
+    port.postMessage(message);
   }
-}
-
-function throwInvalidType(type: never) {
-  throw new Error(`Invalid type ${type}`);
 }
 
 function setOrRemoveDocumentIconUrl(status: string) {

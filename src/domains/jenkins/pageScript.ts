@@ -11,13 +11,13 @@ import {
   BlueOceanActivity,
 } from "./blueOceanTypes";
 import {
-  JENKINS_MESSAGE_TYPE,
-  JenkinsMessage,
+  PIPELINE_RUN_MESSAGE_TYPE,
+  PipelineRunMessage,
   FAVICON_MESSAGE_TYPE,
 } from "./types";
 import { isPipelineRun, getPipelineRunStatus } from "./jenkinsPipelineRun";
 import {
-  getParamsFromBrowserUrl,
+  getParamsFromDisplayUrl,
   buildPipelineRunApiUrl,
 } from "./blueOceanUrlUtils";
 import type MobX from "mobx";
@@ -42,7 +42,7 @@ export async function executeJenkinsPageScript() {
   sendInitialActivityData(communication, mobx, activityServiceData);
   observeActivityChange(communication, mobx, activityServiceData);
   addHistoryChangeListener(() => {
-    sendCurrentPageFavicon(communication, activityServiceData);
+    sendCurrentPageFavicon(communication, activityServiceData, true);
   });
 }
 
@@ -107,8 +107,8 @@ function sendInitialActivityData(
 ) {
   activityServiceData.forEach((activity) => {
     if (isPipelineRun(activity)) {
-      const message: JenkinsMessage = {
-        type: JENKINS_MESSAGE_TYPE,
+      const message: PipelineRunMessage = {
+        type: PIPELINE_RUN_MESSAGE_TYPE,
         pipelineRun: activity,
         options: {
           notify: isNewPipelineRun(activity),
@@ -138,8 +138,8 @@ function observeActivityChange(
         ? getPipelineRunStatus(pipelineRun) !==
           getPipelineRunStatus(oldPipelineRun)
         : isNewPipelineRun(pipelineRun);
-      const message: JenkinsMessage = {
-        type: JENKINS_MESSAGE_TYPE,
+      const message: PipelineRunMessage = {
+        type: PIPELINE_RUN_MESSAGE_TYPE,
         pipelineRun,
         options: {
           notify,
@@ -154,21 +154,26 @@ function observeActivityChange(
 
 function sendCurrentPageFavicon(
   communication: ScriptCommunication,
-  activityServiceData: MobX.ObservableMap<BlueOceanActivity>
+  activityServiceData: MobX.ObservableMap<BlueOceanActivity>,
+  historyChanged = false
 ) {
   let status = "";
   const activity = getActivityFromLocationPathname(activityServiceData);
   if (activity && isPipelineRun(activity)) {
     status = getPipelineRunStatus(activity);
   }
-  communication.postMessage({ type: FAVICON_MESSAGE_TYPE, status });
+  communication.postMessage({
+    type: FAVICON_MESSAGE_TYPE,
+    status,
+    historyChanged,
+  });
 }
 
 function getActivityFromLocationPathname(
   activityServiceData: MobX.ObservableMap<BlueOceanActivity>
 ) {
   const { pathname } = window.location;
-  const urlParams = getParamsFromBrowserUrl(pathname);
+  const urlParams = getParamsFromDisplayUrl(pathname);
   const pipelineRunApiUrl = buildPipelineRunApiUrl(urlParams);
   return activityServiceData.get(pipelineRunApiUrl);
 }

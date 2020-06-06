@@ -1,6 +1,6 @@
 import { ExtensionOptions } from "./types";
 
 export const defaultExtensionOptions: ExtensionOptions = {
-  jenkinsDomain: "",
-  githubDomain: "https://github.com",
+  jenkinsOrigin: "",
+  githubOrigin: "https://github.com",
 };

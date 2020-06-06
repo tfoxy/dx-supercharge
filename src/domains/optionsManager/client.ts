@@ -23,14 +23,10 @@ export async function setExtensionOptions(options: ExtensionOptions) {
 }
 
 async function applyOptions(options: ExtensionOptions) {
-  const { githubDomain, jenkinsDomain } = options;
-  const origins = [];
-  if (jenkinsDomain !== "") {
-    origins.push(`${jenkinsDomain}/*`);
-  }
-  if (githubDomain !== "") {
-    origins.push(`${githubDomain}/*`);
-  }
+  const { githubOrigin, jenkinsOrigin } = options;
+  const origins: string[] = [];
+  addOrigin(jenkinsOrigin, origins);
+  addOrigin(githubOrigin, origins);
   await updateOrigins(origins);
 }
 
@@ -56,4 +52,21 @@ async function updateOrigins(origins: string[]) {
       origins: unusedOrigins,
     });
   }
+}
+
+function addOrigin(url: string, origins: string[]) {
+  if (url === "") {
+    return;
+  }
+  let urlObject: URL;
+  try {
+    urlObject = new URL(url);
+  } catch {
+    throw new Error(`Invalid url: ${url}`);
+  }
+  const { origin } = urlObject;
+  if (origin !== url) {
+    throw new Error(`Origin "${url}" should be "${origin}"`);
+  }
+  origins.push(`${origin}/*`);
 }

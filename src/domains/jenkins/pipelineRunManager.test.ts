@@ -1,16 +1,18 @@
 import "jest-webextension-mock";
-import { browser, Tabs } from "webextension-polyfill-ts";
-import { addJenkinsPipelineRun } from "./background";
+import { Tabs } from "webextension-polyfill-ts";
+import { addJenkinsPipelineRun } from "./pipelineRunManager";
 import { getExtensionOptions } from "../optionsManager/background";
 import { AddPipelineRunOptions, JenkinsData } from "./types";
 import { BlueOceanPipelineRunImpl } from "./blueOceanTypes";
 import { StorageWrapper } from "../storageManager";
 import { createNotification } from "../notificationManager/background";
 import { getMockFn, createPartialObject } from "test/utils";
+import { filterTabsByPipelineRun } from "./pageTabs";
 
 jest.mock("../storageManager");
 jest.mock("../optionsManager/background");
 jest.mock("../notificationManager/background");
+jest.mock("./pageTabs");
 
 const JENKINS_DOMAIN = "https://example.com";
 const REGULAR_API_URL =
@@ -27,7 +29,7 @@ describe("addJenkinsPipelineRun", () => {
   beforeAll(() => {
     getMockFn(getExtensionOptions).mockReturnValue(
       createPartialObject({
-        jenkinsDomain: JENKINS_DOMAIN,
+        jenkinsOrigin: JENKINS_DOMAIN,
       })
     );
   });
@@ -40,9 +42,7 @@ describe("addJenkinsPipelineRun", () => {
     getMockFn(StorageWrapper.prototype.get).mockImplementation(
       () => storageWrapperData
     );
-    getMockFn(browser.tabs.query).mockImplementation(() =>
-      Promise.resolve(tabs)
-    );
+    getMockFn(filterTabsByPipelineRun).mockImplementation(() => tabs);
   });
 
   function withPipelineRun(

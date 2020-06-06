@@ -69,13 +69,13 @@ export default function OptionsForm() {
       <h2>Jenkins</h2>
       <div>
         <label>
-          <span>Domain (without / at the end) </span>
+          <span>Origin </span>
           <input
             type="text"
-            name="jenkinsDomain"
+            name="jenkinsOrigin"
             className={styles.input}
             placeholder="https://example.com"
-            value={data.jenkinsDomain}
+            value={data.jenkinsOrigin}
             onChange={onInputChange}
           />
         </label>

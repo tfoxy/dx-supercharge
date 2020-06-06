@@ -6,7 +6,7 @@ import {
 import * as iconByStatusMap from "./icons";
 import {
   getParamsFromApiUrl,
-  buildPipelineRunBrowserUrl,
+  buildPipelineRunDisplayUrl,
 } from "./blueOceanUrlUtils";
 
 export interface StoredJenkinsPipelineRun {
@@ -51,9 +51,9 @@ export function getPipelineRunName(
   return [organization, pipelines.join("/"), branch, `#${run}`].join(" / ");
 }
 
-export function getPipelineRunBrowserUrl(
+export function getPipelineRunDisplayUrl(
   pipelineRun: BlueOceanPipelineRunImpl
 ): string {
   const urlParams = getParamsFromApiUrl(pipelineRun._links.self.href);
-  return buildPipelineRunBrowserUrl(urlParams);
+  return buildPipelineRunDisplayUrl(urlParams);
 }

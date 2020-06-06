@@ -41,6 +41,8 @@ export class StorageWrapper<K extends keyof StorageData> {
   }
 
   public save() {
-    setStorageData(this.key, this.get());
+    if (this.value) {
+      setStorageData(this.key, this.value);
+    }
   }
 }
