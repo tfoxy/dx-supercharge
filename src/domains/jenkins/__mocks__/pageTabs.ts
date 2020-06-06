@@ -5,8 +5,12 @@ const __typecheck__: typeof Module = {} as typeof MockModule;
 
 export const getPageTabs = jest.fn();
 
+export const getPageTabList = jest.fn();
+
 export const setPageTab = jest.fn();
 
 export const deletePageTab = jest.fn();
 
 export const filterTabsByPipelineRun = jest.fn();
+
+export const filterTabsByApiUrl = jest.fn();
