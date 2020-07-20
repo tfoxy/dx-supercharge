@@ -28,7 +28,7 @@
     "jest-environment-jsdom": "^26.0.1",
     "jest-webextension-mock": "^3.6.0",
     "loader-utils": "^2.0.0",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "mobx": "2.6.0",
     "style-loader": "^1.2.1",
     "ts-jest": "^26.1.0",
