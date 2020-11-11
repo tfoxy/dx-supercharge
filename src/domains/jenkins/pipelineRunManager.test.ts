@@ -1,8 +1,7 @@
 import "jest-webextension-mock";
-import { Tabs } from "webextension-polyfill-ts";
 import { addJenkinsPipelineRun } from "./pipelineRunManager";
 import { getExtensionOptions } from "../optionsManager/background";
-import { AddPipelineRunOptions, JenkinsData } from "./types";
+import { AddPipelineRunOptions, JenkinsData, PageTab } from "./types";
 import { BlueOceanPipelineRunImpl } from "./blueOceanTypes";
 import { StorageWrapper } from "../storageManager";
 import { createNotification } from "../notificationManager/background";
@@ -24,7 +23,7 @@ describe("addJenkinsPipelineRun", () => {
   let pipelineRun: BlueOceanPipelineRunImpl;
   let options: AddPipelineRunOptions;
   let storageWrapperData: JenkinsData;
-  let tabs: Tabs.Tab[];
+  let tabs: PageTab[];
 
   beforeAll(() => {
     getMockFn(getExtensionOptions).mockReturnValue(
@@ -83,13 +82,13 @@ describe("addJenkinsPipelineRun", () => {
   }
 
   function withPipelineTab(
-    partialTab: Partial<Tabs.Tab>,
+    partialTab: Partial<PageTab>,
     fn: jest.EmptyFunction
   ) {
     describe(`with pipeline tab ${JSON.stringify(partialTab)}`, () => {
       beforeEach(() => {
-        const baseTab: Partial<Tabs.Tab> = {
-          id: tabs.length + 1,
+        const baseTab: Partial<PageTab> = {
+          // id: tabs.length + 1,
           url: `${JENKINS_DOMAIN}${REGULAR_PIPELINE_DISPLAY_URL}`,
         };
         tabs.push(createPartialObject(Object.assign(baseTab, partialTab)));
@@ -100,13 +99,13 @@ describe("addJenkinsPipelineRun", () => {
   }
 
   function withPipelineRunTab(
-    partialTab: Partial<Tabs.Tab>,
+    partialTab: Partial<PageTab>,
     fn: jest.EmptyFunction
   ) {
     describe(`with pipeline run tab ${JSON.stringify(partialTab)}`, () => {
       beforeEach(() => {
-        const baseTab: Partial<Tabs.Tab> = {
-          id: tabs.length + 1,
+        const baseTab: Partial<PageTab> = {
+          // id: tabs.length + 1,
           url: `${JENKINS_DOMAIN}${REGULAR_DISPLAY_URL}`,
         };
         tabs.push(createPartialObject(Object.assign(baseTab, partialTab)));

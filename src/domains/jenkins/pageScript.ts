@@ -97,7 +97,10 @@ function isNewPipelineRun(pipelineRun: BlueOceanPipelineRunImpl) {
 
 function isAuthUserPipelineRun(pipelineRun: BlueOceanPipelineRunImpl) {
   const authUserId = getAuthUser().id;
-  return pipelineRun.changeSet.some((cs) => cs.author.id === authUserId);
+  return (
+    pipelineRun.changeSet.some((cs) => cs.author.id === authUserId) ||
+    pipelineRun.causes.some((c) => c.userId === authUserId)
+  );
 }
 
 function sendInitialActivityData(

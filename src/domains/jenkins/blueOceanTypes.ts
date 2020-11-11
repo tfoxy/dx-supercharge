@@ -153,6 +153,9 @@ export interface BlueOceanPipelineRunImpl {
 }
 
 export interface BlueOceanCause {
+  /**
+   * @example "Push event to branch master" | "Started by user {user.id}"
+   */
   shortDescription: string;
   userId?: string;
   userName?: string;
