@@ -6,6 +6,20 @@ export type GithubMessage = StatusMessage;
 export interface StatusMessage {
   type: typeof STATUS_MESSAGE_TYPE;
   pageTitle: string;
-  status: string;
+  statusMessage: string;
+  statusList: ActionStatus[];
   iconUrl: string;
+}
+
+export interface ActionStatus {
+  type: ActionStatusType;
+  message: string;
+}
+
+export enum ActionStatusType {
+  ERROR,
+  WARNING,
+  PROGRESS,
+  SUCCESS,
+  UNKNOWN,
 }

@@ -64,13 +64,12 @@ function throwInvalidType(type: never): never {
 }
 
 function notifyPullRequestStatus(message: StatusMessage, port: Runtime.Port) {
-  console.log(message);
   createNotification(
     undefined,
     {
       type: "basic",
       title: message.pageTitle,
-      message: message.status,
+      message: message.statusMessage,
       iconUrl: message.iconUrl,
     },
     {
