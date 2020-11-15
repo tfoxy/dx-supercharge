@@ -45,7 +45,6 @@ function getFaviconColor(
   darkMode: boolean
 ): string | undefined {
   const defaultColor = darkMode ? "white" : undefined;
-  console.log(type);
   switch (type) {
     case ActionStatusType.ERROR:
       return defaultColor;
