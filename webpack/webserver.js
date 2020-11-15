@@ -1,7 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
 const WebpackDevServer = require("webpack-dev-server");
-const WriteFilePlugin = require("write-file-webpack-plugin");
 const config = require("../webpack.config");
 
 const port = 3001;
@@ -14,16 +13,13 @@ for (let entryName in config.entry) {
 }
 
 config.mode = "development";
-config.plugins = [
-  new webpack.HotModuleReplacementPlugin(),
-  ...config.plugins,
-  new WriteFilePlugin(),
-];
+config.plugins = [new webpack.HotModuleReplacementPlugin(), ...config.plugins];
 
 const compiler = webpack(config);
 
 const server = new WebpackDevServer(compiler, {
   hot: true,
+  writeToDisk: true,
   contentBase: path.resolve(__dirname, "..", "dist"),
   sockPort: port,
   headers: {

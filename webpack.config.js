@@ -48,7 +48,7 @@ function getConfig() {
         },
         {
           test: /\.svg$/,
-          loader: {
+          use: {
             loader: "file-loader",
             options: {
               name: (absolutePath) => path.relative(srcPath, absolutePath),
