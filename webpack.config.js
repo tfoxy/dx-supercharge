@@ -32,7 +32,6 @@ function getConfig() {
         },
         {
           test: /\.css$/,
-          exclude: /\.module\.css$/,
           use: [
             {
               loader: "style-loader",
@@ -40,23 +39,7 @@ function getConfig() {
             {
               loader: "css-loader",
               options: {
-                importLoaders: 1,
-              },
-            },
-          ],
-        },
-        {
-          test: /\.module\.css$/,
-          use: [
-            {
-              loader: "style-loader",
-            },
-            {
-              loader: "css-loader",
-              options: {
-                importLoaders: 1,
                 modules: {
-                  mode: "local",
                   getLocalIdent,
                 },
               },
