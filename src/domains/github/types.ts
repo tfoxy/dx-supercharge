@@ -1,10 +1,11 @@
-export const GITHUB_MESSAGE_TYPE = "GITHUB";
+export const GITHUB_PORT_NAME = "GITHUB";
+export const STATUS_MESSAGE_TYPE = "STATUS";
 
-export interface GithubStatusChange {
+export type GithubMessage = StatusMessage;
+
+export interface StatusMessage {
+  type: typeof STATUS_MESSAGE_TYPE;
+  pageTitle: string;
   status: string;
-  title: string;
-}
-
-export interface GithubMessage extends GithubStatusChange {
-  type: typeof GITHUB_MESSAGE_TYPE;
+  iconUrl: string;
 }

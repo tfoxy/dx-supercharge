@@ -1,3 +1,3 @@
-console.log("HELLO!");
+import { executeGithubContentScript } from "./domains/github/contentScript";
 
-export {};
+executeGithubContentScript();

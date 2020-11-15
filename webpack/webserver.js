@@ -4,7 +4,7 @@ const WebpackDevServer = require("webpack-dev-server");
 const WriteFilePlugin = require("write-file-webpack-plugin");
 const config = require("../webpack.config");
 
-const port = 3000;
+const port = 3001;
 
 for (let entryName in config.entry) {
   config.entry[entryName] = [

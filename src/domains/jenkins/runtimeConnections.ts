@@ -33,7 +33,7 @@ function portDisconnectListener(port: Runtime.Port) {
   deletePageTab(createPageTabFromPort(port));
 }
 
-function throwInvalidType(type: never) {
+function throwInvalidType(type: never): never {
   throw new Error(`Invalid type ${type}`);
 }
 
