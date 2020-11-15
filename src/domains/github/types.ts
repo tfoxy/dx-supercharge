@@ -18,7 +18,9 @@ export interface ActionStatus {
 
 export enum ActionStatusType {
   ERROR,
+  CONFLICT,
   WARNING,
+  MERGE_REQUIRED,
   PROGRESS,
   SUCCESS,
   UNKNOWN,

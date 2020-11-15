@@ -112,6 +112,7 @@ function observePullRequestStatusChanges(
 function getStatusFromActionItemElement(element: Element): ActionStatus {
   let type = ActionStatusType.UNKNOWN;
   let message = "";
+
   const statusHeading = element.querySelector(".status-heading");
   if (statusHeading) {
     const { classList } = statusHeading;
@@ -122,11 +123,24 @@ function getStatusFromActionItemElement(element: Element): ActionStatus {
     }
     message = statusHeading.textContent?.trim() ?? "";
   }
-  if (type > ActionStatusType.ERROR) {
+
+  const updateBranchFormElement = element.querySelector(
+    ".js-update-branch-form"
+  );
+  const resolveConflictAnchorElement = element.querySelector(
+    '[href$="/conflicts"]'
+  );
+  if (updateBranchFormElement) {
+    type = ActionStatusType.MERGE_REQUIRED;
+  }
+  if (resolveConflictAnchorElement) {
+    type = ActionStatusType.CONFLICT;
+  }
+
+  if (type >= ActionStatusType.PROGRESS) {
     const icon = element.querySelector(
       ":not(.merging-body-merge-warning) > .branch-action-item-icon"
     );
-    console.log(icon, element.textContent);
     if (icon) {
       const { classList } = icon;
       if (classList.contains("completeness-indicator-success")) {
@@ -136,6 +150,7 @@ function getStatusFromActionItemElement(element: Element): ActionStatus {
       }
     }
   }
+
   return {
     type,
     message,

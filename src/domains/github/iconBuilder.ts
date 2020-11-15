@@ -27,7 +27,9 @@ export function iconBuilder(statusList: ActionStatus[]): string {
 function getStatusIcon(type: ActionStatusType): string | undefined {
   switch (type) {
     case ActionStatusType.ERROR:
+    case ActionStatusType.CONFLICT:
     case ActionStatusType.WARNING:
+    case ActionStatusType.MERGE_REQUIRED:
       return octiconX;
     case ActionStatusType.PROGRESS:
       return octiconDotFill;
@@ -43,11 +45,15 @@ function getFaviconColor(
   darkMode: boolean
 ): string | undefined {
   const defaultColor = darkMode ? "white" : undefined;
+  console.log(type);
   switch (type) {
     case ActionStatusType.ERROR:
       return defaultColor;
+    case ActionStatusType.CONFLICT:
     case ActionStatusType.WARNING:
       return "#cb2431";
+    case ActionStatusType.MERGE_REQUIRED:
+      return "#6a737d";
     case ActionStatusType.PROGRESS:
       return "#dbab09";
     case ActionStatusType.SUCCESS:
