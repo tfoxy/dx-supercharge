@@ -1,21 +1,9 @@
-import aborted from "./aborted.svg";
-import failure from "./failure.svg";
-import not_built from "./not_built.svg";
-import paused from "./paused.svg";
-import queued from "./queued.svg";
-import running from "./running.svg";
-import success from "./success.svg";
-import unknown from "./unknown.svg";
-import unstable from "./unstable.svg";
-
-export {
-  aborted,
-  failure,
-  not_built,
-  paused,
-  queued,
-  running,
-  success,
-  unknown,
-  unstable,
-};
+export const aborted = new URL("./aborted.svg", import.meta.url).pathname;
+export const failure = new URL("./failure.svg", import.meta.url).pathname;
+export const not_built = new URL("./not_built.svg", import.meta.url).pathname;
+export const paused = new URL("./paused.svg", import.meta.url).pathname;
+export const queued = new URL("./queued.svg", import.meta.url).pathname;
+export const running = new URL("./running.svg", import.meta.url).pathname;
+export const success = new URL("./success.svg", import.meta.url).pathname;
+export const unknown = new URL("./unknown.svg", import.meta.url).pathname;
+export const unstable = new URL("./unstable.svg", import.meta.url).pathname;

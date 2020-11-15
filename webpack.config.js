@@ -16,10 +16,13 @@ function getConfig() {
    * @type {import("webpack").Configuration}
    */
   const config = {
+    context: srcPath,
     entry,
     output: {
       path: path.join(__dirname, "dist"),
       filename: "[name].js",
+      assetModuleFilename: "[file]",
+      publicPath: "/",
     },
     module: {
       rules: [
@@ -45,15 +48,6 @@ function getConfig() {
               },
             },
           ],
-        },
-        {
-          test: /\.svg$/,
-          use: {
-            loader: "file-loader",
-            options: {
-              name: (absolutePath) => path.relative(srcPath, absolutePath),
-            },
-          },
         },
       ],
     },
