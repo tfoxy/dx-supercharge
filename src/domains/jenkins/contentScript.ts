@@ -1,5 +1,6 @@
-import { executePageScriptFile } from "../pageScriptCommunication";
 import { browser, Runtime } from "webextension-polyfill-ts";
+import { createFaviconManager, FaviconManager } from "../faviconManager";
+import { executePageScriptFile } from "../pageScriptCommunication";
 import {
   HISTORY_MESSAGE_TYPE,
   JENKINS_PORT_NAME,
@@ -8,21 +9,23 @@ import {
 } from "./types";
 import { getIconUrlFromPipelineRunStatus } from "./jenkinsPipelineRun";
 
-let iconLink: HTMLLinkElement | undefined;
-
 export function executeJenkinsContentScript() {
   const port = browser.runtime.connect(undefined, { name: JENKINS_PORT_NAME });
+  const faviconManager = createFaviconManager();
   executePageScriptFile(
     browser.runtime.getURL("jenkinsPageScript.js")
-  ).addEventListener((event) => pageScriptMessageListener(event.detail, port));
+  ).addEventListener((event) =>
+    pageScriptMessageListener(event.detail, port, faviconManager)
+  );
 }
 
 function pageScriptMessageListener(
   message: PageScriptMessage,
-  port: Runtime.Port
+  port: Runtime.Port,
+  faviconManager: FaviconManager
 ) {
   if (message.type === FAVICON_MESSAGE_TYPE) {
-    setOrRemoveDocumentIconUrl(message.status);
+    setOrRemoveDocumentIconUrl(message.status, faviconManager);
     if (message.historyChanged) {
       port.postMessage({
         type: HISTORY_MESSAGE_TYPE,
@@ -34,30 +37,14 @@ function pageScriptMessageListener(
   }
 }
 
-function setOrRemoveDocumentIconUrl(status: string) {
+function setOrRemoveDocumentIconUrl(
+  status: string,
+  faviconManager: FaviconManager
+) {
   if (status) {
     const iconUrl = getIconUrlFromPipelineRunStatus(status);
-    setDocumentIconUrl(iconUrl);
+    faviconManager.setDocumentIconUrl(browser.runtime.getURL(iconUrl));
   } else {
-    removeIcon();
-  }
-}
-
-function setDocumentIconUrl(iconUrl: string) {
-  if (!iconLink) {
-    iconLink = document.createElement("link");
-    iconLink.rel = "icon";
-  }
-  iconLink.type = "image/svg+xml";
-  iconLink.href = browser.runtime.getURL(iconUrl);
-  if (!iconLink.parentNode) {
-    document.head.appendChild(iconLink);
-  }
-}
-
-function removeIcon() {
-  if (iconLink) {
-    iconLink.type = "image/x-icon";
-    iconLink.href = "/favicon.ico";
+    faviconManager.removeIcon();
   }
 }

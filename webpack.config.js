@@ -49,6 +49,10 @@ function getConfig() {
             },
           ],
         },
+        {
+          test: /\.svg$/,
+          type: "asset/source",
+        },
       ],
     },
     plugins: [

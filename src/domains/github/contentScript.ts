@@ -1,4 +1,6 @@
 import { browser } from "webextension-polyfill-ts";
+import { createFaviconManager, FaviconManager } from "../faviconManager";
+import { iconBuilder } from "./iconBuilder";
 import {
   ActionStatus,
   ActionStatusType,
@@ -9,6 +11,7 @@ import {
 
 interface PageState {
   statusList: ActionStatus[];
+  iconUrl: string;
 }
 
 export function executeGithubContentScript() {
@@ -21,7 +24,9 @@ export function executeGithubContentScript() {
 function observePullRequestPageChanges(pageContainer: Element) {
   const pageState: PageState = {
     statusList: [],
+    iconUrl: "",
   };
+  const faviconManager = createFaviconManager();
 
   const observer = new MutationObserver(triggerObserver);
   observer.observe(pageContainer, { childList: true });
@@ -33,14 +38,19 @@ function observePullRequestPageChanges(pageContainer: Element) {
       ".discussion-timeline-actions"
     );
     if (discussionTimelineActions) {
-      observePullRequestStatusChanges(discussionTimelineActions, pageState);
+      observePullRequestStatusChanges(
+        discussionTimelineActions,
+        pageState,
+        faviconManager
+      );
     }
   }
 }
 
 function observePullRequestStatusChanges(
   discussionTimelineActions: Element,
-  pageState: PageState
+  pageState: PageState,
+  faviconManager: FaviconManager
 ) {
   const port = browser.runtime.connect(undefined, { name: GITHUB_PORT_NAME });
 
@@ -55,7 +65,7 @@ function observePullRequestStatusChanges(
 
   async function notifyStatusChange() {
     const actionItemElements = discussionTimelineActions.querySelectorAll(
-      ".branch-action-item"
+      ".js-details-container > .branch-action-item"
     );
 
     if (actionItemElements.length !== 3) {
@@ -64,8 +74,14 @@ function observePullRequestStatusChanges(
     const newStatusList = [...actionItemElements].map(
       getStatusFromActionItemElement
     );
-    console.log(newStatusList);
     const mergeStatus = newStatusList[2];
+
+    const iconUrl = iconBuilder(newStatusList);
+    if (pageState.iconUrl !== iconUrl) {
+      faviconManager.setDocumentIconUrl(iconUrl);
+      pageState.iconUrl = iconUrl;
+    }
+
     if (
       mergeStatus.type === ActionStatusType.PROGRESS ||
       mergeStatus.type === ActionStatusType.UNKNOWN
@@ -76,13 +92,15 @@ function observePullRequestStatusChanges(
       .filter((s, i) => s.message !== pageState.statusList[i]?.message)
       .map((s) => s.message)
       .join(" / ");
+
     if (pageState.statusList.length > 0 && statusMessage) {
       const message: StatusMessage = {
         type: STATUS_MESSAGE_TYPE,
         statusMessage,
         statusList: newStatusList,
         pageTitle: document.title,
-        iconUrl: await getFaviconDataUrl(),
+        // iconUrl: await getFaviconDataUrl(),
+        iconUrl,
       };
       port.postMessage(message);
     }
@@ -105,7 +123,10 @@ function getStatusFromActionItemElement(element: Element): ActionStatus {
     message = statusHeading.textContent?.trim() ?? "";
   }
   if (type > ActionStatusType.ERROR) {
-    const icon = element.querySelector(".branch-action-item-icon");
+    const icon = element.querySelector(
+      ":not(.merging-body-merge-warning) > .branch-action-item-icon"
+    );
+    console.log(icon, element.textContent);
     if (icon) {
       const { classList } = icon;
       if (classList.contains("completeness-indicator-success")) {
@@ -119,38 +140,4 @@ function getStatusFromActionItemElement(element: Element): ActionStatus {
     type,
     message,
   };
-}
-
-function getFaviconDataUrl() {
-  const url =
-    document.head.querySelector('link[rel="icon"]')?.getAttribute("href") ?? "";
-  return toDataUrl(url);
-}
-
-function toDataUrl(url: string) {
-  return new Promise<string>((resolve, reject) => {
-    var xhr = new XMLHttpRequest();
-    xhr.onload = () => {
-      var reader = new FileReader();
-      reader.onloadend = () => {
-        resolve(getStringFromFileReaderResult(reader.result));
-      };
-      reader.readAsDataURL(xhr.response);
-    };
-    xhr.onerror = reject;
-    xhr.open("GET", url);
-    xhr.responseType = "blob";
-    xhr.send();
-  });
-}
-
-function getStringFromFileReaderResult(
-  result: string | ArrayBuffer | null
-): string {
-  if (!result) return "";
-  if (result instanceof ArrayBuffer) {
-    const decoder = new TextDecoder("utf-8");
-    return decoder.decode(result);
-  }
-  return result;
 }
