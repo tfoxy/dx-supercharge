@@ -16,7 +16,9 @@ export function createFaviconManager(): FaviconManager {
         iconLink.rel = "icon";
       }
       iconLink.type = "image/svg+xml";
-      iconLink.href = iconUrl;
+      iconLink.href = iconUrl.startsWith("data:")
+        ? iconUrl
+        : browser.runtime.getURL(iconUrl);
       if (!iconLink.parentNode) {
         previousIconLink = document.head.querySelector(
           'link[rel="icon"]'

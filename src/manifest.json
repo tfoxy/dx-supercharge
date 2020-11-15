@@ -12,7 +12,6 @@
   "permissions": ["https://github.com/*", "notifications", "webNavigation"],
   "web_accessible_resources": [
     "jenkinsPageScript.js",
-    "domains/github/icons/*.svg",
     "domains/jenkins/icons/*.svg"
   ],
   "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'"

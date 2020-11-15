@@ -43,7 +43,7 @@ function setOrRemoveDocumentIconUrl(
 ) {
   if (status) {
     const iconUrl = getIconUrlFromPipelineRunStatus(status);
-    faviconManager.setDocumentIconUrl(browser.runtime.getURL(iconUrl));
+    faviconManager.setDocumentIconUrl(iconUrl);
   } else {
     faviconManager.removeIcon();
   }

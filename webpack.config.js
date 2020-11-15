@@ -52,6 +52,7 @@ function getConfig() {
         {
           test: /\.svg$/,
           type: "asset/source",
+          dependency: { not: ["url"] },
         },
       ],
     },
