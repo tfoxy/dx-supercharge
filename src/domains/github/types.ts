@@ -7,8 +7,14 @@ export interface StatusMessage {
   type: typeof STATUS_MESSAGE_TYPE;
   pageTitle: string;
   statusMessage: string;
-  statusList: ActionStatus[];
+  statusMapping: ActionStatusMapping;
   iconUrl: string;
+}
+
+export interface ActionStatusMapping {
+  review: ActionStatus;
+  check: ActionStatus;
+  merge: ActionStatus;
 }
 
 export interface ActionStatus {
@@ -17,11 +23,15 @@ export interface ActionStatus {
 }
 
 export enum ActionStatusType {
+  CLOSED,
   ERROR,
+  CHANGES_REQUESTED,
   CONFLICT,
   WARNING,
   MERGE_REQUIRED,
   PROGRESS,
+  COMMENT,
   SUCCESS,
+  MERGED,
   UNKNOWN,
 }

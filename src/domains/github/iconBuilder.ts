@@ -1,5 +1,13 @@
-import { ActionStatus, ActionStatusType } from "./types";
-import { favicon, octiconCheck, octiconDotFill, octiconX } from "./icons";
+import { ActionStatusMapping, ActionStatusType } from "./types";
+import {
+  favicon,
+  octiconCheck,
+  octiconComment,
+  octiconDotFill,
+  octiconFileDiff,
+  octiconX,
+} from "./icons";
+import { assertUnreachable } from "../utils/assertions";
 
 const SVG_MIME_TYPE = "image/svg+xml";
 
@@ -9,12 +17,11 @@ interface TemplateOptions {
   faviconColor?: string;
 }
 
-export function iconBuilder(statusList: ActionStatus[]): string {
-  const [reviewsStatus, checksStatus, mergeStatus] = statusList;
+export function iconBuilder(statusMapping: ActionStatusMapping): string {
   const darkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
-  const topRightIcon = getStatusIcon(reviewsStatus.type);
-  const bottomRightIcon = getStatusIcon(checksStatus.type);
-  const faviconColor = getFaviconColor(mergeStatus.type, darkMode);
+  const topRightIcon = getStatusIcon(statusMapping.review.type);
+  const bottomRightIcon = getStatusIcon(statusMapping.check.type);
+  const faviconColor = getFaviconColor(statusMapping.merge.type, darkMode);
   const newFavicon = buildFaviconFromTemplate({
     topRightIcon,
     bottomRightIcon,
@@ -31,12 +38,20 @@ function getStatusIcon(type: ActionStatusType): string | undefined {
     case ActionStatusType.WARNING:
     case ActionStatusType.MERGE_REQUIRED:
       return octiconX;
+    case ActionStatusType.CHANGES_REQUESTED:
+      return octiconFileDiff;
+    case ActionStatusType.COMMENT:
+      return octiconComment;
     case ActionStatusType.PROGRESS:
       return octiconDotFill;
     case ActionStatusType.SUCCESS:
       return octiconCheck;
-    default:
+    case ActionStatusType.UNKNOWN:
+    case ActionStatusType.CLOSED:
+    case ActionStatusType.MERGED:
       return undefined;
+    default:
+      assertUnreachable(type);
   }
 }
 
@@ -44,21 +59,27 @@ function getFaviconColor(
   type: ActionStatusType,
   darkMode: boolean
 ): string | undefined {
-  const defaultColor = darkMode ? "white" : undefined;
   switch (type) {
+    case ActionStatusType.UNKNOWN:
     case ActionStatusType.ERROR:
-      return defaultColor;
+    case ActionStatusType.CHANGES_REQUESTED:
+    case ActionStatusType.COMMENT:
+      return darkMode ? "white" : undefined;
+    case ActionStatusType.CLOSED:
+      return "#d82828";
     case ActionStatusType.CONFLICT:
     case ActionStatusType.WARNING:
-      return "#cb2431";
+      return "#f3582c";
     case ActionStatusType.MERGE_REQUIRED:
       return "#6a737d";
     case ActionStatusType.PROGRESS:
       return "#dbab09";
     case ActionStatusType.SUCCESS:
       return "#22863a";
+    case ActionStatusType.MERGED:
+      return "#73589a";
     default:
-      return defaultColor;
+      assertUnreachable(type);
   }
 }
 

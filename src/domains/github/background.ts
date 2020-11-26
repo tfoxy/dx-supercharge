@@ -15,6 +15,7 @@ import {
   getExtensionOptions,
 } from "../optionsManager/background";
 import { createNotification } from "../notificationManager/background";
+import { assertUnreachable } from "../utils/assertions";
 
 export function registerGithubBackgroundListeners() {
   browser.runtime.onConnect.addListener((port) => {
@@ -55,12 +56,8 @@ function messageListener(message: GithubMessage, port: Runtime.Port) {
       notifyPullRequestStatus(message, port);
       break;
     default:
-      throwInvalidType(message.type);
+      assertUnreachable(message.type);
   }
-}
-
-function throwInvalidType(type: never): never {
-  throw new Error(`Invalid type ${type}`);
 }
 
 function notifyPullRequestStatus(message: StatusMessage, port: Runtime.Port) {

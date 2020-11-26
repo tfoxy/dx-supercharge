@@ -3,6 +3,7 @@ import { createFaviconManager, FaviconManager } from "../faviconManager";
 import { iconBuilder } from "./iconBuilder";
 import {
   ActionStatus,
+  ActionStatusMapping,
   ActionStatusType,
   GITHUB_PORT_NAME,
   StatusMessage,
@@ -13,6 +14,22 @@ interface PageState {
   statusList: ActionStatus[];
   iconUrl: string;
 }
+
+const statusTypeByPrState: Record<string, ActionStatusType> = {
+  purple: ActionStatusType.MERGED,
+  red: ActionStatusType.CLOSED,
+};
+
+const messageByStatusType: Record<number, string> = {
+  [ActionStatusType.MERGED]: "Merged",
+  [ActionStatusType.CLOSED]: "Closed",
+};
+
+const statusTypeByIcon: Record<string, ActionStatusType> = {
+  "dot-fill": ActionStatusType.PROGRESS,
+  comment: ActionStatusType.COMMENT,
+  "file-diff": ActionStatusType.CHANGES_REQUESTED,
+};
 
 export function executeGithubContentScript() {
   const pageContainer = document.querySelector("#js-repo-pjax-container");
@@ -40,6 +57,7 @@ function observePullRequestPageChanges(pageContainer: Element) {
     if (discussionTimelineActions) {
       observePullRequestStatusChanges(
         discussionTimelineActions,
+        pageContainer,
         pageState,
         faviconManager
       );
@@ -49,6 +67,7 @@ function observePullRequestPageChanges(pageContainer: Element) {
 
 function observePullRequestStatusChanges(
   discussionTimelineActions: Element,
+  pageContainer: Element,
   pageState: PageState,
   faviconManager: FaviconManager
 ) {
@@ -69,22 +88,65 @@ function observePullRequestStatusChanges(
     );
 
     if (actionItemElements.length !== 3) {
+      const mergeType = getMergeTypeFromPrState(pageContainer);
+      if (typeof mergeType === "undefined") return;
+      const mergeStatus: ActionStatus = {
+        message: messageByStatusType[mergeType],
+        type: mergeType,
+      };
+      const statusMapping: ActionStatusMapping = {
+        review: { message: "", type: ActionStatusType.UNKNOWN },
+        check: { message: "", type: ActionStatusType.UNKNOWN },
+        merge: mergeStatus,
+      };
+      const iconUrl = iconBuilder(statusMapping);
+      if (pageState.iconUrl !== iconUrl) {
+        faviconManager.setDocumentIconUrl(iconUrl);
+        pageState.iconUrl = iconUrl;
+      }
+      if (
+        pageState.statusList.length > 0 &&
+        pageState.statusList[0].type !== mergeType
+      ) {
+        const message: StatusMessage = {
+          type: STATUS_MESSAGE_TYPE,
+          statusMessage: mergeStatus.message,
+          statusMapping,
+          pageTitle: document.title,
+          iconUrl,
+        };
+        port.postMessage(message);
+      }
+      pageState.statusList = [mergeStatus];
       return;
     }
+
     const newStatusList = [...actionItemElements].map(
       getStatusFromActionItemElement
     );
-    const mergeStatus = newStatusList[2];
+    const statusMapping = {
+      review: newStatusList[0],
+      check: newStatusList[1],
+      merge: newStatusList[2],
+    };
 
-    const iconUrl = iconBuilder(newStatusList);
+    if (statusMapping.review.type !== ActionStatusType.SUCCESS) {
+      const reviewType = getReviewTypeFromIssueSidebar(pageContainer);
+      if (reviewType) {
+        statusMapping.review.type = reviewType;
+      }
+    }
+
+    const iconUrl = iconBuilder(statusMapping);
     if (pageState.iconUrl !== iconUrl) {
       faviconManager.setDocumentIconUrl(iconUrl);
       pageState.iconUrl = iconUrl;
     }
 
     if (
-      mergeStatus.type === ActionStatusType.PROGRESS ||
-      mergeStatus.type === ActionStatusType.UNKNOWN
+      [ActionStatusType.PROGRESS, ActionStatusType.UNKNOWN].includes(
+        statusMapping.merge.type
+      )
     ) {
       return;
     }
@@ -97,9 +159,8 @@ function observePullRequestStatusChanges(
       const message: StatusMessage = {
         type: STATUS_MESSAGE_TYPE,
         statusMessage,
-        statusList: newStatusList,
+        statusMapping,
         pageTitle: document.title,
-        // iconUrl: await getFaviconDataUrl(),
         iconUrl,
       };
       port.postMessage(message);
@@ -155,4 +216,45 @@ function getStatusFromActionItemElement(element: Element): ActionStatus {
     type,
     message,
   };
+}
+
+function getMergeTypeFromPrState(
+  pageContainer: Element
+): ActionStatusType | undefined {
+  const prState = pageContainer.querySelector(".gh-header-meta .State");
+  if (!prState) {
+    return;
+  }
+
+  const stateClass = [...prState.classList].find((c) =>
+    c.startsWith("State--")
+  );
+  const state = stateClass?.slice("State--".length);
+  return statusTypeByPrState[state ?? ""];
+}
+
+function getReviewTypeFromIssueSidebar(
+  pageContainer: Element
+): ActionStatusType | undefined {
+  const sidebarForm = pageContainer.querySelector(".js-issue-sidebar-form");
+  if (!sidebarForm) {
+    return;
+  }
+
+  const iconElements = sidebarForm.querySelectorAll(
+    ".reviewers-status-icon.float-right:not(.mr-2) > .octicon"
+  );
+  const types = [...iconElements]
+    .map((el) => {
+      const iconClass = [...el.classList].find((c) => c.startsWith("octicon-"));
+      const icon = iconClass?.slice("octicon-".length);
+      return statusTypeByIcon[icon ?? ""];
+    })
+    .filter((type) => typeof type !== "undefined");
+
+  if (!types.length) {
+    return;
+  }
+
+  return Math.min(...types);
 }

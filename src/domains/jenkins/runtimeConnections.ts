@@ -1,4 +1,5 @@
 import { Runtime } from "webextension-polyfill-ts";
+import { assertUnreachable } from "../utils/assertions";
 import { addJenkinsPipelineRun } from "./pipelineRunManager";
 import {
   JenkinsMessage,
@@ -25,16 +26,12 @@ async function portMessageListener(
       setPageTab(createPageTabFromPort(port, message.url));
       break;
     default:
-      throwInvalidType(message!.type);
+      assertUnreachable(message);
   }
 }
 
 function portDisconnectListener(port: Runtime.Port) {
   deletePageTab(createPageTabFromPort(port));
-}
-
-function throwInvalidType(type: never): never {
-  throw new Error(`Invalid type ${type}`);
 }
 
 function createPageTabFromPort(port: Runtime.Port, url?: string) {
