@@ -7,7 +7,7 @@ import {
   octiconFileDiff,
   octiconX,
 } from "./icons";
-import { assertUnreachable } from "../utils/assertions";
+import { assertIsDefined, assertUnreachable } from "../utils/assertions";
 
 const SVG_MIME_TYPE = "image/svg+xml";
 
@@ -111,11 +111,5 @@ function setFaviconInnerIcon(
     assertIsDefined(cutElement);
     groupElement.innerHTML = icon;
     cutElement.parentElement?.removeChild(cutElement);
-  }
-}
-
-function assertIsDefined<T>(val: T): asserts val is NonNullable<T> {
-  if (val === undefined || val === null) {
-    throw new Error(`Expected 'val' to be defined, but received ${val}`);
   }
 }
