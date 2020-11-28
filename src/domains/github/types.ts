@@ -23,15 +23,15 @@ export interface ActionStatus {
 }
 
 export enum ActionStatusType {
-  CLOSED,
-  ERROR,
-  CHANGES_REQUESTED,
-  CONFLICT,
-  WARNING,
-  MERGE_REQUIRED,
-  PROGRESS,
-  COMMENT,
-  SUCCESS,
-  MERGED,
   UNKNOWN,
+  MERGED,
+  SUCCESS,
+  COMMENT,
+  PROGRESS,
+  MERGE_REQUIRED,
+  WARNING,
+  CONFLICT,
+  CHANGES_REQUESTED,
+  ERROR,
+  CLOSED,
 }
