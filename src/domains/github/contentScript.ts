@@ -16,6 +16,7 @@ export function executeGithubContentScript() {
 
   const observer = new MutationObserver(callback);
   observer.observe(pageContainer, {
+    childList: true,
     attributes: true,
     subtree: true,
   });
@@ -42,6 +43,8 @@ function getPageActionStatusMapping(
     return handlePullRequestPage(pageContainer);
   } else if (pathname.includes("/compare/")) {
     return handleComparePage(pageContainer);
+  } else if (/^\/[^/]+\/[^/]+$/.test(pathname)) {
+    return handleRepoHomePage(pageContainer);
   }
   return createActionStatusMapping();
 }
@@ -68,6 +71,12 @@ function handlePullRequestPage(pageContainer: Element): ActionStatusMapping {
 function handleComparePage(pageContainer: Element): ActionStatusMapping {
   const mapping = createActionStatusMapping();
   mapping.merge.type = getMergeTypeFromPreMergability(pageContainer);
+  mapping.check = getLastCheckStatusFromNewDiscussionTimeline(pageContainer);
+  return mapping;
+}
+
+function handleRepoHomePage(pageContainer: Element): ActionStatusMapping {
+  const mapping = createActionStatusMapping();
   mapping.check = getLastCheckStatusFromNewDiscussionTimeline(pageContainer);
   return mapping;
 }
