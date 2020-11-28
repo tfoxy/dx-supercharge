@@ -1,7 +1,7 @@
-import { ActionStatus, ActionStatusMapping, ActionStatusType } from "./types";
-import { createActionStatusMapping } from "./utils";
+import { ActionStatus, ActionStatusMapping, ActionStatusType } from "../types";
+import { createActionStatusMapping } from "../utils";
 
-export default function getActionStatusMapping(
+export default function getActionStatusMappingFromDiscussionTimelineActions(
   pageContainer: Element
 ): ActionStatusMapping {
   const discussionTimelineActions = pageContainer.querySelector(

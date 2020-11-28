@@ -1,4 +1,4 @@
-import { ActionStatus, ActionStatusType } from "./types";
+import { ActionStatus, ActionStatusType } from "../types";
 
 const statusTypeByPrState: Record<string, ActionStatusType> = {
   purple: ActionStatusType.MERGED,
@@ -10,7 +10,9 @@ const messageByStatusType: Record<number, string> = {
   [ActionStatusType.CLOSED]: "Closed",
 };
 
-export default function getMergeStatus(pageContainer: Element): ActionStatus {
+export default function getMergeStatusFromHeaderState(
+  pageContainer: Element
+): ActionStatus {
   const prState = pageContainer.querySelector(".gh-header-meta .State");
   if (!prState) {
     return {

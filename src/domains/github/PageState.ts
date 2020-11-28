@@ -15,6 +15,7 @@ export default class PageState {
   });
   private readonly faviconManager = createFaviconManager();
   private statusMapping: ActionStatusMapping = createActionStatusMapping();
+  private pathname: string = "";
 
   public setActionStatusMapping(mapping: ActionStatusMapping) {
     const iconUrl = iconBuilder(mapping);
@@ -26,27 +27,26 @@ export default class PageState {
       this.statusMapping.merge,
     ];
 
-    if (oldStatusList.every((s) => !s.type)) {
-      this.statusMapping = mapping;
-      return;
+    const { pathname } = window.location;
+
+    if (oldStatusList.some((s) => s.type) && pathname === this.pathname) {
+      const statusMessage = [mapping.review, mapping.check, mapping.merge]
+        .filter((s, i) => s.message && s.message !== oldStatusList[i].message)
+        .map((s) => s.message)
+        .join(" // ");
+      if (statusMessage) {
+        const message: StatusMessage = {
+          type: STATUS_MESSAGE_TYPE,
+          statusMessage,
+          statusMapping: this.statusMapping,
+          pageTitle: document.title,
+          iconUrl,
+        };
+        this.port.postMessage(message);
+      }
     }
 
-    const statusMessage = [mapping.review, mapping.check, mapping.merge]
-      .filter((s, i) => s.message && s.message !== oldStatusList[i].message)
-      .map((s) => s.message)
-      .join(" / ");
-
-    if (!statusMessage) return;
-
-    const message: StatusMessage = {
-      type: STATUS_MESSAGE_TYPE,
-      statusMessage,
-      statusMapping: this.statusMapping,
-      pageTitle: document.title,
-      iconUrl,
-    };
-    this.port.postMessage(message);
-
     this.statusMapping = mapping;
+    this.pathname = pathname;
   }
 }
