@@ -6,7 +6,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "lodash-es": "^4.17.15",
+    "lodash-es": "^4.17.21",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "webextension-polyfill-ts": "^0.22.0"
