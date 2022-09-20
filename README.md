@@ -5,7 +5,7 @@
 ## Installation
 1. Clone repository
 2. Run `npm ci && npm run build`
-3. Go to chrome://extensions/
+3. Go to [`chrome://extensions/`](chrome://extensions)
 4. Enable developer mode on the top right
 5. Click on Load Unpacked
 6. Select the `dist` folder of this extension
